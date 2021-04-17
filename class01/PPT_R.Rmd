@@ -1,0 +1,412 @@
+---
+title: "火箭隊R培訓課程"
+output: html_notebook
+---
+
+## 〇新手村
+
+### R-studio pane layout：Source, Console
+
+### 推薦套件(packages)
+
+### 安裝套件
+
+```{r}
+install.packages("tidyverse")
+install.packages("data.table")
+
+```
+
+### 引用套件
+
+```{r}
+#library(tidyverse)
+library(dplyr)
+library(magrittr)
+#library(readxl)
+library(writexl)
+#library(RODBC)
+library(data.table)
+```
+
+### 設定工作資料夾
+
+```{r}
+getwd()
+#setwd("D://R_notebook//ppt//")
+setwd("/home/jovyan/class01")
+```
+
+## 〇出村打怪
+
+### 〇讀取資料
+
+#### 資料庫
+
+```{r}
+#library(RODBC)
+channel       = odbcConnect("j1452",uid="400201","********")
+ex.Rpt03         = sqlQuery(channel,"SELECT * FROM MT_Rpt03")
+```
+
+#### 讀取Rdata
+
+```{r}
+load("ex.Rpt03.RData")
+```
+
+#### 讀取Excel
+
+```{r}
+ex.Hash.company = read_excel("ex.Hash.company.xlsx")
+```
+
+#### 讀取csv
+
+```{r}
+ex.Hash.PL = read.csv("ex.Hash.PL.csv")
+ex.Hash.PL
+ex.Hash.PL[-1]
+
+ex.Hash.PL = read.csv("ex.Hash.PL.csv")[-1]
+ex.Hash.PL
+```
+
+### 〇資料清洗
+
+#### Pipeline
+
+```{r}
+x    = 3
+x1   = sin(x)
+x2   = log(x1)
+way1 = x2^2
+
+
+way2 = (log(sin(3)))^2
+
+way3 <- 3 %>% 
+          sin() %>% 
+          log() %>%
+          .^2
+
+         3 %>% 
+          sin() %>% 
+          log() %>%
+          .^2 ->way4
+
+print(way1)
+print(way2)
+print(way3)
+print(way4)
+
+rm(x,x1,x2,way1,way2,way3,way4)
+```
+
+#### 資料的輪廓
+
+```{r}
+# 直接看
+ex.Rpt03
+
+# View()
+ex.Rpt03 %>% 
+  View()
+
+vv<-function(df){
+  View(df)
+}
+
+ex.Rpt03 %>% 
+  vv
+
+#head()
+ex.Rpt03 %>% 
+  head() %>% 
+  vv
+
+#colnames
+ex.Rpt03 %>% 
+  colnames()
+
+#str
+ex.Rpt03 %>% 
+  str()
+```
+
+#### dplyr
+
+##### merge
+
+```{r}
+#merge
+ex.Rpt03 %>% 
+  merge(ex.Hash.company,by="CorpCode")
+
+ex.Rpt03 %>% 
+  merge(ex.Hash.company,by="CorpCode") %>% 
+  merge(ex.Hash.PL,by="AccountsCode")
+```
+
+##### select
+
+```{r}
+#select,rename
+ex.Rpt03 %>% 
+  merge(ex.Hash.company,by="CorpCode") %>% 
+  merge(ex.Hash.PL,by="AccountsCode") %>% 
+  select(Name,DataDate) %>% 
+  dplyr::rename(Date=DataDate)
+
+ex.Rpt03 %>% 
+  merge(ex.Hash.company,by="CorpCode") %>% 
+  merge(ex.Hash.PL,by="AccountsCode") %>% 
+  select(Name,Date=DataDate)
+
+#select,everything
+ex.Rpt03 %>% 
+  merge(ex.Hash.company,by="CorpCode") %>% 
+  merge(ex.Hash.PL,by="AccountsCode") %>% 
+  select(Name,Date=DataDate,AccountsName,everything())
+
+#select,-column
+ex.Rpt03 %>% 
+  merge(ex.Hash.company,by="CorpCode") %>% 
+  merge(ex.Hash.PL,by="AccountsCode") %>% 
+  select(Name,Date=DataDate,AccountsName,everything()) %>% 
+  select(-CorpCode,-AccountsCode,-IsMaster,-PILI,-GotDate) 
+
+#select, group_by,filter
+ex.Rpt03 %>% 
+  merge(ex.Hash.company,by="CorpCode") %>%
+  merge(ex.Hash.PL,by="AccountsCode") %>%   
+  select(Name,Date=DataDate,AccountsName,everything()) %>%
+  select(-CorpCode,-AccountsCode,-IsMaster,-PILI,-GotDate) %>% 
+  group_by(Name,Date) %>%
+  filter(AdjustBatch ==max(AdjustBatch))
+  ## 看列數變小
+
+ex.Rpt03 %>% 
+  merge(ex.Hash.company,by="CorpCode") %>%
+  merge(ex.Hash.PL,by="AccountsCode") %>%   
+  select(Name,Date=DataDate,AccountsName,everything()) %>%
+  select(-CorpCode,-AccountsCode,-IsMaster,-PILI,-GotDate) %>% 
+  group_by(Name,Date) %>%
+  filter(AdjustBatch ==max(AdjustBatch)) %>% 
+  select(-AdjustBatch)
+  ## 看列數變小
+
+
+# %<>%
+ex.Rpt03
+
+new.ex.Rpt03 <- ex.Rpt03 %>% 
+  merge(ex.Hash.company,by="CorpCode") %>%
+  merge(ex.Hash.PL,by="AccountsCode") %>%   
+  select(Name,Date=DataDate,AccountsName,everything()) %>%
+  select(-CorpCode,-AccountsCode,-IsMaster,-PILI,-GotDate) %>% 
+  group_by(Name,Date) %>%
+  filter(AdjustBatch ==max(AdjustBatch)) %>% 
+  select(-AdjustBatch)
+
+ex.Rpt03 %<>% 
+  merge(ex.Hash.company,by="CorpCode") %>%
+  merge(ex.Hash.PL,by="AccountsCode") %>%   
+  select(Name,Date=DataDate,AccountsName,everything()) %>%
+  select(-CorpCode,-AccountsCode,-IsMaster,-PILI,-GotDate) %>% 
+  group_by(Name,Date) %>%
+  filter(AdjustBatch ==max(AdjustBatch)) %>% 
+  select(-AdjustBatch)
+
+ex.Rpt03
+
+
+
+```
+
+##### mutate
+
+```{r}
+# mutate
+ex.Rpt03 %>% 
+  mutate(new.Remaining = Remaining/10^8)
+
+ex.Rpt03 %>% 
+  mutate(Remaining = Remaining/10^8)
+
+ex.Rpt03 %<>% 
+  mutate(Remaining = Remaining/10^8)
+
+ex.Rpt03
+
+
+```
+
+##### filter
+
+```{r}
+# ==
+ex.Rpt03 %>%
+  filter(Date==11002) %>% 
+  filter(AccountsName=="稅前損益")
+
+# !=
+ex.Rpt03 %>% 
+  filter(Date==11002) %>% 
+  filter(AccountsName=="稅前損益") %>% 
+  filter(Name!="A")
+
+# %in%
+ex.Rpt03 %>% 
+  filter(Date==11002) %>% 
+  filter(AccountsName=="稅前損益") %>% 
+  filter(Name %in% c("A","B","C"))
+
+# %in% + !
+ex.Rpt03 %>% 
+  filter(Date==11002) %>% 
+  filter(AccountsName=="稅前損益") %>% 
+  filter(!Name %in% c("A","B","C"))
+
+# grepl
+# single keyword
+ex.Rpt03 %>% 
+  filter(Date==11002) %>% 
+  filter(Name=="A") %>% 
+  filter(grepl("損益",AccountsName))
+
+# multiple keywords
+ex.Rpt03 %>% 
+  filter(Date==11002) %>% 
+  filter(Name=="A") %>% 
+  filter(grepl("稅前損益|準備金",AccountsName))
+
+# inverse grepl
+ex.Rpt03 %>% 
+  filter(Date==11002) %>% 
+  filter(Name=="A") %>% 
+  filter(grepl("損益|準備金",AccountsName)) %>% 
+  filter(!grepl("稅前損益|稅後損益",AccountsName))
+
+
+```
+
+##### summarise
+
+```{r}
+#想要知道業界總損前損益
+ex.Rpt03 %>% 
+  filter(AccountsName=="稅前損益") %>% 
+  group_by(Date) %>% 
+  summarise(PL = sum(Remaining))
+
+```
+
+##### arrange
+
+```{r}
+#由大到小
+ex.Rpt03 %>% 
+  filter(AccountsName=="稅前損益") %>% 
+  group_by(Date) %>% 
+  summarise(total = sum(Remaining)) %>% 
+  arrange(desc(Date))
+
+#由小到大
+ex.Rpt03 %>% 
+  filter(Date==11002) %>%
+  filter(AccountsName=="稅前損益") %>% 
+  arrange(Name)
+
+```
+
+#### Pivot Table
+
+##### dcast
+
+```{r}
+#wide format
+ex.Rpt03 %>%
+  dcast(Date+Name~AccountsName)
+
+ex.Rpt03 %>%
+  as.data.table() %>%
+  dcast(Date+Name~AccountsName)
+
+ex.Rpt03.wide <- ex.Rpt03 %>%
+  as.data.table() %>%
+  dcast(Date+Name~AccountsName,sum)
+
+
+
+## 程式可讀性很重要
+ex.Rpt03.wide %>%
+  select(Date,Name,透過損益按公允價值衡量之金融資產及負債損益,透過其他綜合損益按公允價值衡量之金融資產已實現損益,除列按攤銷後成本衡量之金融資產淨損益)
+
+ex.Rpt03.wide %>% 
+  select(Date,Name,
+         透過損益按公允價值衡量之金融資產及負債損益,
+         透過其他綜合損益按公允價值衡量之金融資產已實現損益,
+         除列按攤銷後成本衡量之金融資產淨損益)
+
+
+ex.Rpt03.wide %>% 
+  select(Date,Name,
+         FVPL  = 透過損益按公允價值衡量之金融資產及負債損益,
+         FVOCI = 透過其他綜合損益按公允價值衡量之金融資產已實現損益,
+         AC    = 除列按攤銷後成本衡量之金融資產淨損益)
+
+
+ex.Rpt03.wide %>% 
+  select(Date,Name,
+         FVPL  = 透過損益按公允價值衡量之金融資產及負債損益,
+         FVOCI = 透過其他綜合損益按公允價值衡量之金融資產已實現損益,
+         AC    = 除列按攤銷後成本衡量之金融資產淨損益) %>% 
+  mutate(FVPL  = FVPL*10^8)
+
+
+#mutate_each
+## lambda function
+ex.Rpt03.wide %>% 
+  select(Date,Name,
+         FVPL  = 透過損益按公允價值衡量之金融資產及負債損益,
+         FVOCI = 透過其他綜合損益按公允價值衡量之金融資產已實現損益,
+         AC    = 除列按攤銷後成本衡量之金融資產淨損益) %>% 
+  mutate_each(~round(.,0))
+
+ex.Rpt03.wide %<>% 
+  select(Date,Name,
+         FVPL  = 透過損益按公允價值衡量之金融資產及負債損益,
+         FVOCI = 透過其他綜合損益按公允價值衡量之金融資產已實現損益,
+         AC    = 除列按攤銷後成本衡量之金融資產淨損益) %>% 
+  mutate_each(~round(.,0),-Date,-Name)
+
+ex.Rpt03.wide %>% 
+  arrange(Name,Date)
+
+ex.Rpt03.wide %>% 
+  arrange(Name,desc(Date))
+
+
+#summarise_each
+ex.Rpt03.wide %>% 
+  group_by(Date) %>% 
+  summarise_each(~sum(.),-Name) %>% 
+  arrange(desc(Date))
+
+```
+
+##### melt
+```{r}
+ex.Rpt03.wide %>% 
+  melt(id.vars=c("Date","Name"))
+
+ex.Rpt03.long <- ex.Rpt03.wide %>% 
+  melt(id.vars=c("Date","Name"))
+
+```
+
+### 〇畫圖
+```{r}
+
+```
