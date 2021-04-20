@@ -5,3 +5,4 @@ dependencies:
   - r-tidyverse
   - r-showtext
   - r-stringr
+  - r-readxl
