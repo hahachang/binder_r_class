@@ -2,7 +2,8 @@
 install.packages("magrittr")
 install.packages("data.table")
 install.packages("readxl")
-install.packages("tidyverse")
+install.packages("ggplot2")
+#install.packages("tidyverse")
 
 #install.packages("RODBC")
 
