@@ -23,10 +23,12 @@ install.packages("data.table")
 #library(tidyverse)
 library(dplyr)
 library(magrittr)
-library(readxl)
-library(writexl)
-#library(RODBC)
 library(data.table)
+library(ggplot2)
+#library(readxl)
+#library(writexl)
+#library(RODBC)
+
 ```
 
 ### 設定工作資料夾
@@ -58,7 +60,7 @@ load("ex.Rpt03.RData")
 #### 讀取Excel
 
 ```{r}
-ex.Hash.company = read_excel("ex.Hash.company.xlsx")
+#ex.Hash.company = read_excel("ex.Hash.company.xlsx")
 ex.Hash.company = read.csv("ex.Hash.company.csv")[-1]
 ```
 
@@ -429,7 +431,7 @@ ex.Rpt03.long %>%
 ```
 
 
-### function
+#### function:date2time
 ```{r}
 date2time = function(datasets){
   datasets %>% 
@@ -462,7 +464,7 @@ change_date = function(datasets){
   }
 ```
 
-
+#### ggplot
 ```{r}
 #字串格式轉換成時間格式
 ex.Rpt03.long %>% 
@@ -510,7 +512,19 @@ ex.Rpt03.long %>%
   labs(x="時間",y="金額(億)",title="稅前損益",subtitle="2018~2021",caption="資料來源:愛與真實邪惡火箭隊R")
   
 
+library(showtext)
+showtext_auto()
+font_add("jf", "jf-openhuninn-1.1.ttf")
 
+
+ex.Rpt03.long %>% 
+  date2time() %>% 
+  filter(Name=="A",variable=="PL") %>% 
+  ggplot(aes(Time,value))+
+  geom_line()+
+  geom_point(color="red")+
+  geom_text(aes(label=value))+
+  labs(x="時間",y="金額(億)",title="稅前損益",subtitle="2018~2021",caption="資料來源:愛與真實邪惡火箭隊R",family="jf")
 
 ex.Rpt03.long %>% 
   date2time() %>% 
@@ -520,7 +534,7 @@ ex.Rpt03.long %>%
   geom_line()+
   geom_point(color="red")+
   geom_text(aes(label=value))+
-  labs(x="時間",y="金額(億)",title="稅前損益",subtitle="2018~2021",caption="資料來源:愛與真實邪惡火箭隊R")+
+  labs(x="時間",y="金額(億)",title="稅前損益",subtitle="2018~2021",caption="資料來源:愛與真實邪惡火箭隊R",family="jf")+
   facet_wrap(~Name)
 
 
@@ -532,7 +546,81 @@ ex.Rpt03.long %>%
   geom_line()+
   geom_point(color="red")+
   geom_text(aes(label=value))+
-  labs(x="時間",y="金額(億)",title="稅前損益",subtitle="2018~2021",caption="資料來源:愛與真實邪惡火箭隊R")+
+  labs(x="時間",y="金額(億)",title="稅前損益",subtitle="2018~2021",caption="資料來源:愛與真實邪惡火箭隊R",family="jf")+
+  facet_wrap(~Name,scale="free")
+
+
+ex.Rpt03.long %>% 
+  date2time() %>% 
+  #filter(Name=="A",variable=="PL") %>% 
+  filter(variable=="PL") %>% 
+  ggplot(aes(Time,value))+
+  geom_line()+
+  geom_point(color="red")+
+  #geom_text(aes(label=value))+
+  labs(x="時間",y="金額(億)",title="稅前損益",subtitle="2018~2021",caption="資料來源:愛與真實邪惡火箭隊R",family="jf")+
   facet_wrap(~Name,scale="free")
 
 ```
+## 〇 完整程式
+```{r}
+#讀取資料
+load("ex.Rpt03.RData")
+ex.Hash.company = read.csv("ex.Hash.company.csv")[-1]
+ex.Hash.PL = read.csv("ex.Hash.PL.csv",fileEncoding = "Big5")[-1]
+
+
+#資料清洗
+#merge,select,group_by,filter
+ex.Rpt03 %<>% 
+  merge(ex.Hash.company,by="CorpCode") %>%
+  merge(ex.Hash.PL,by="AccountsCode") %>%   
+  select(Name,Date=DataDate,AccountsName,everything()) %>%
+  select(-CorpCode,-AccountsCode,-IsMaster,-PILI,-GotDate) %>% 
+  group_by(Name,Date) %>%
+  filter(AdjustBatch ==max(AdjustBatch)) %>% 
+  select(-AdjustBatch)
+
+#mutate
+ex.Rpt03 %<>% 
+  mutate(Remaining = Remaining/10^8)
+
+#dcast
+ex.Rpt03.wide <- ex.Rpt03 %>%
+  as.data.table() %>%
+  dcast(Date+Name~AccountsName,sum)
+
+#melt
+ex.Rpt03.long <- ex.Rpt03.wide %>% 
+  melt(id.vars=c("Date","Name"))
+
+##ggplot
+library(showtext)
+showtext_auto()
+font_add("jf", "jf-openhuninn-1.1.ttf")
+
+
+### geom_line,geom_point,中文問題
+ex.Rpt03.long %>% 
+  date2time() %>% 
+  filter(Name=="A",variable=="PL") %>% 
+  ggplot(aes(Time,value))+
+  geom_line()+
+  geom_point(color="red")+
+  geom_text(aes(label=value))+
+  labs(x="時間",y="金額(億)",title="稅前損益",subtitle="2018~2021",caption="資料來源:愛與真實邪惡火箭隊R",family="jf")
+
+### facet_wrap
+ex.Rpt03.long %>% 
+  date2time() %>% 
+  #filter(Name=="A",variable=="PL") %>% 
+  filter(variable=="PL") %>% 
+  ggplot(aes(Time,value))+
+  geom_line()+
+  geom_point(color="red")+
+  #geom_text(aes(label=value))+
+  labs(x="時間",y="金額(億)",title="稅前損益",subtitle="2018~2021",caption="資料來源:愛與真實邪惡火箭隊R",family="jf")+
+  facet_wrap(~Name,scale="free")
+
+```
+
