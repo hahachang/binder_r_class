@@ -565,7 +565,7 @@ ex.Rpt03.long %>%
   geom_line()+
   geom_point(color="red")+
   #geom_text(aes(label=value))+
-  labs(x="時間",y="金額(億)",title="稅前損益",subtitle="2018~2021",caption="資料來源:愛與真實邪惡火箭隊R",family="jf")+
+  labs(x="時間",y="金額(億)",title="稅前損益",subtitle="2018~2021",caption="資料來源:保發中心-愛與真實邪惡火箭隊R",family="jf")+
   facet_wrap(~Name,scale="free")
 
 ```
@@ -679,5 +679,53 @@ ex.Rpt03.long %>%
 ggsave("PL.png")
 ggsave("PL.png",width = 9,height = 6)
 
+```
+
+
+## 〇 新人大禮包
+```{r}
+load("news_tii_2020.Rdata")
+
+df.news %>% 
+  head()
+
+#政治立場
+df.news %>% 
+  filter(grepl("A01",print)) %>% 
+  group_by(print) %>% 
+  summarise(count = n())
+
+#去除A013
+df.news %>% 
+  filter(grepl("A01$",print)&(!grepl("AA01",print))) %>% 
+  group_by(print) %>% 
+  summarise(count = n())
+
+#去除空白
+df.news %>% 
+  filter(grepl("A01$",print)&(!grepl("AA01",print))) %>% 
+  pull(print) %>% 
+  unique()
+
+df.news %>% 
+  filter(grepl("A01$",print)&(!grepl("AA01",print))) %>%
+  mutate(print =str_replace_all(print,pattern = " ",replacement = "")) %>% 
+  pull(print) %>% 
+  unique()
+
+#清理結束
+df.news %>% 
+  filter(grepl("A01$",print)&(!grepl("AA01",print))) %>% 
+  mutate(print =str_replace_all(print,pattern = " ",replacement = "")) %>% 
+  group_by(print) %>% 
+  summarise(count = n()) %>% 
+  arrange(desc(count))
+
+#關鍵字
+df.news %>% 
+  filter(grepl("央行",title))
+
+df.news %>% 
+  filter(grepl("央行",title)|grepl("央行",abstract))
 ```
 
