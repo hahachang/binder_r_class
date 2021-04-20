@@ -707,6 +707,8 @@ df.news %>%
   pull(print) %>% 
   unique()
 
+library(stringr)
+
 df.news %>% 
   filter(grepl("A01$",print)&(!grepl("AA01",print))) %>%
   mutate(print =str_replace_all(print,pattern = " ",replacement = "")) %>% 
