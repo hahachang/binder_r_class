@@ -516,7 +516,7 @@ ex.Rpt03.long %>%
   geom_line()+
   geom_point(color="red")+
   geom_text(aes(label=value))+
-  labs(x="時間",y="金額(億)",title="稅前損益",subtitle="2018~2021",caption="資料來源:愛與真實邪惡火箭隊R")
+  labs(x="時間",y="金額(億)",title="稅前損益",subtitle="2018~2021",caption="資料來源:保發中心-愛與真實邪惡火箭隊R")
   
 
 library(showtext)
@@ -531,7 +531,7 @@ ex.Rpt03.long %>%
   geom_line()+
   geom_point(color="red")+
   geom_text(aes(label=value))+
-  labs(x="時間",y="金額(億)",title="稅前損益",subtitle="2018~2021",caption="資料來源:愛與真實邪惡火箭隊R",family="jf")
+  labs(x="時間",y="金額(億)",title="稅前損益",subtitle="2018~2021",caption="資料來源:保發中心-愛與真實邪惡火箭隊R",family="jf")
 
 ex.Rpt03.long %>% 
   date2time() %>% 
@@ -541,7 +541,7 @@ ex.Rpt03.long %>%
   geom_line()+
   geom_point(color="red")+
   geom_text(aes(label=value))+
-  labs(x="時間",y="金額(億)",title="稅前損益",subtitle="2018~2021",caption="資料來源:愛與真實邪惡火箭隊R",family="jf")+
+  labs(x="時間",y="金額(億)",title="稅前損益",subtitle="2018~2021",caption="資料來源:保發中心-愛與真實邪惡火箭隊R",family="jf")+
   facet_wrap(~Name)
 
 
@@ -553,7 +553,7 @@ ex.Rpt03.long %>%
   geom_line()+
   geom_point(color="red")+
   geom_text(aes(label=value))+
-  labs(x="時間",y="金額(億)",title="稅前損益",subtitle="2018~2021",caption="資料來源:愛與真實邪惡火箭隊R",family="jf")+
+  labs(x="時間",y="金額(億)",title="稅前損益",subtitle="2018~2021",caption="資料來源:保發中心-愛與真實邪惡火箭隊R",family="jf")+
   facet_wrap(~Name,scale="free")
 
 
@@ -623,7 +623,7 @@ ex.Rpt03.long %>%
   geom_line()+
   geom_point(color="red")+
   geom_text(aes(label=value))+
-  labs(x="時間",y="金額(億)",title="稅前損益",subtitle="2018~2021",caption="資料來源:愛與真實邪惡火箭隊R",family="jf")
+  labs(x="時間",y="金額(億)",title="稅前損益",subtitle="2018~2021",caption="資料來源:保發中心-愛與真實邪惡火箭隊R",family="jf")
 
 ### facet_wrap
 ex.Rpt03.long %>% 
@@ -634,8 +634,11 @@ ex.Rpt03.long %>%
   geom_line()+
   geom_point(color="red")+
   #geom_text(aes(label=value))+
-  labs(x="時間",y="金額(億)",title="稅前損益",subtitle="2018~2021",caption="資料來源:愛與真實邪惡火箭隊R",family="jf")+
+  labs(x="時間",y="金額(億)",title="稅前損益",subtitle="2018~2021",caption="資料來源:保發中心-愛與真實邪惡火箭隊R",family="jf")+
   facet_wrap(~Name,scale="free")
+
+ggsave("PL.png")
+ggsave("PL.png",width = 9,height = 6)
 
 ```
 
