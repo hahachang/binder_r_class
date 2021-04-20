@@ -571,6 +571,12 @@ ex.Rpt03.long %>%
 ```
 ## 〇 完整程式
 ```{r}
+#library
+library(dplyr)
+library(magrittr)
+library(data.table)
+library(ggplot2)
+
 #讀取資料
 load("ex.Rpt03.RData")
 ex.Hash.company = read.csv("ex.Hash.company.csv")[-1]
@@ -613,6 +619,39 @@ ex.Rpt03.long <- ex.Rpt03.wide %>%
 library(showtext)
 showtext_auto()
 font_add("jf", "jf-openhuninn-1.1.ttf")
+
+
+## date2time
+date2time = function(datasets){
+  datasets %>% 
+    change_date() %>% 
+    month_firstday()
+  
+}  
+
+change_date = function(datasets){
+  if("DataDate" %in% colnames(datasets)){
+    datasets %>%
+      tidyr::extract(DataDate,c("Year","Month"), "(^\\w{2,3})(\\w{2}+)$",remove=F) %>%
+      mutate(Year = as.numeric(Year)+1911) %>%
+      mutate(Month = as.numeric(Month))
+  }else if("Date" %in% colnames(datasets)){
+    datasets %>%
+      tidyr::extract(Date,c("Year","Month"), "(^\\w{2,3})(\\w{2}+)$",remove=F) %>%
+      mutate(Year = as.numeric(Year)+1911) %>%
+      mutate(Month = as.numeric(Month))
+  }
+}
+
+
+  month_firstday = function(datasets){
+    datasets %>% 
+      mutate(Time = (as.Date(
+        as.character(
+          paste(as.numeric(Year),as.numeric(Month),1,sep="-"))))) %>%
+      select(Time,everything())
+  }
+
 
 
 ### geom_line,geom_point,中文問題
