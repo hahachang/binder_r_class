@@ -156,6 +156,13 @@ ex.Rpt03 %>%
 ##### select
 
 ```{r}
+#select
+ex.Rpt03 %>% 
+  merge(ex.Hash.company,by="CorpCode") %>% 
+  merge(ex.Hash.PL,by="AccountsCode") %>% 
+  select(Name,DataDate)
+
+
 #select,rename
 ex.Rpt03 %>% 
   merge(ex.Hash.company,by="CorpCode") %>% 
@@ -589,6 +596,14 @@ ex.Rpt03 %<>%
 ex.Rpt03.wide <- ex.Rpt03 %>%
   as.data.table() %>%
   dcast(Date+Name~AccountsName,sum)
+
+ex.Rpt03.wide %<>% 
+  select(Date,Name,
+         FVPL  = 透過損益按公允價值衡量之金融資產及負債損益,
+         FVOCI = 透過其他綜合損益按公允價值衡量之金融資產已實現損益,
+         AC    = 除列按攤銷後成本衡量之金融資產淨損益,
+         PL    = 稅前損益) %>% 
+  mutate_each(~round(.,0),-Date,-Name)
 
 #melt
 ex.Rpt03.long <- ex.Rpt03.wide %>% 
