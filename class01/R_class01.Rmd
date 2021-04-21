@@ -693,7 +693,8 @@ df.news %>%
 df.news %>% 
   filter(grepl("A01",print)) %>% 
   group_by(print) %>% 
-  summarise(count = n())
+  summarise(count = n()) %>% 
+  show_query()
 
 #去除A013
 df.news %>% 
@@ -729,5 +730,26 @@ df.news %>%
 
 df.news %>% 
   filter(grepl("央行",title)|grepl("央行",abstract))
+```
+
+
+## 〇 原來與SQL這麼近
+```{r}
+con <- DBI::dbConnect(RSQLite::SQLite(), filename = ":memory:")
+mtcars_db <- copy_to(con, mtcars)
+
+mtcars_db %>%
+  filter(cyl > 2) %>%
+  select(mpg:hp) %>%
+  group_by(mpg) %>% 
+  summarise(total = sum(hp)) %>% 
+  show_query()
+#> <SQL>
+#> SELECT `mpg`, `cyl`, `disp`, `hp`
+#> FROM `mtcars`
+#> WHERE (`cyl` > 2.0)
+#> LIMIT 10
+
+DBI::dbDisconnect(con)
 ```
 
